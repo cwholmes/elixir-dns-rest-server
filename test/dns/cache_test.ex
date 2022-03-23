@@ -71,23 +71,39 @@ defmodule DNS.CacheTest do
     DNS.Cache.set_record(:srv, "_test_srv1._tcp", {0, 0, 2000, "test"})
     DNS.Cache.set_record(:srv, "_test_srv1._tcp", {0, 0, 1000, "test2"})
     assert DNS.Cache.delete_srv_record("_test_srv1._tcp", %{host: "test", port: 1000}) == :ok
-    assert DNS.Cache.get_record(:srv, "_test_srv1._tcp") == [{0, 0, 2000, "test"}, {0, 0, 1000, "test2"}]
+
+    assert DNS.Cache.get_record(:srv, "_test_srv1._tcp") == [
+             {0, 0, 2000, "test"},
+             {0, 0, 1000, "test2"}
+           ]
   end
 
   test "delete single srv record same host and port extra map entry" do
     DNS.Cache.set_record(:srv, "_test_srv1._tcp", {0, 0, 1000, "test"})
     DNS.Cache.set_record(:srv, "_test_srv1._tcp", {0, 0, 2000, "test"})
     DNS.Cache.set_record(:srv, "_test_srv1._tcp", {0, 0, 1000, "test2"})
-    assert DNS.Cache.delete_srv_record("_test_srv1._tcp", %{host: "test", port: 1000, other: 1}) == :ok
-    assert DNS.Cache.get_record(:srv, "_test_srv1._tcp") == [{0, 0, 2000, "test"}, {0, 0, 1000, "test2"}]
+
+    assert DNS.Cache.delete_srv_record("_test_srv1._tcp", %{host: "test", port: 1000, other: 1}) ==
+             :ok
+
+    assert DNS.Cache.get_record(:srv, "_test_srv1._tcp") == [
+             {0, 0, 2000, "test"},
+             {0, 0, 1000, "test2"}
+           ]
   end
 
   test "delete single srv record char string" do
     DNS.Cache.set_record(:srv, "_test_srv1._tcp", {0, 0, 1000, "test"})
     DNS.Cache.set_record(:srv, "_test_srv1._tcp", {0, 0, 2000, "test"})
     DNS.Cache.set_record(:srv, "_test_srv1._tcp", {0, 0, 1000, "test2"})
-    assert DNS.Cache.delete_srv_record("_test_srv1._tcp", %{host: 'test', port: 1000, other: 1}) == :ok
-    assert DNS.Cache.get_record(:srv, "_test_srv1._tcp") == [{0, 0, 2000, "test"}, {0, 0, 1000, "test2"}]
+
+    assert DNS.Cache.delete_srv_record("_test_srv1._tcp", %{host: 'test', port: 1000, other: 1}) ==
+             :ok
+
+    assert DNS.Cache.get_record(:srv, "_test_srv1._tcp") == [
+             {0, 0, 2000, "test"},
+             {0, 0, 1000, "test2"}
+           ]
   end
 
   test "Canonicalize simple no period" do
@@ -99,11 +115,13 @@ defmodule DNS.CacheTest do
   end
 
   test "Canonicalize canonical no period" do
-    assert DNS.Cache.canonicalize("_test_srv._tcp.example.test.io") == "_test_srv._tcp.example.test.io."
+    assert DNS.Cache.canonicalize("_test_srv._tcp.example.test.io") ==
+             "_test_srv._tcp.example.test.io."
   end
 
   test "Canonicalize canonical with period" do
-    assert DNS.Cache.canonicalize("_test_srv._tcp.example.test.io.") == "_test_srv._tcp.example.test.io."
+    assert DNS.Cache.canonicalize("_test_srv._tcp.example.test.io.") ==
+             "_test_srv._tcp.example.test.io."
   end
 
   test "Canonicalize other canonical no period" do

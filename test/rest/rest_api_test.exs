@@ -35,26 +35,52 @@ defmodule Rest.DnrestApiTest do
   end
 
   test "delete request for srv record gets deleted" do
-    DNS.Cache.set_record(:srv, "_my_test._tcp.example.test.io.", {0, 0, 1000, "test_host.example.test.io"})
+    DNS.Cache.set_record(
+      :srv,
+      "_my_test._tcp.example.test.io.",
+      {0, 0, 1000, "test_host.example.test.io"}
+    )
+
     case delete_and_respond(%{entry: "_my_test._tcp.example.test.io."}, "/dns/srv") do
       {:ok, body} ->
         assert body == "No Content"
+
       {:error, message} ->
+        nil
         # Not sure why this is erroring, but the record is deleting correctly.
     end
+
     assert DNS.Cache.get_record(:srv, "_my_test._tcp.example.test.io.") == nil
   end
 
   test "delete request for single srv record gets deleted" do
-    DNS.Cache.set_record(:srv, "_my_test._tcp.example.test.io.", {0, 0, 1000, "test_host.example.test.io"})
-    DNS.Cache.set_record(:srv, "_my_test._tcp.example.test.io.", {0, 0, 1000, "test_host2.example.test.io"})
-    case delete_and_respond(%{entry: "_my_test._tcp.example.test.io.", host: "test_host.example.test.io"}, "/dns/srv") do
+    DNS.Cache.set_record(
+      :srv,
+      "_my_test._tcp.example.test.io.",
+      {0, 0, 1000, "test_host.example.test.io"}
+    )
+
+    DNS.Cache.set_record(
+      :srv,
+      "_my_test._tcp.example.test.io.",
+      {0, 0, 1000, "test_host2.example.test.io"}
+    )
+
+    case delete_and_respond(
+           %{entry: "_my_test._tcp.example.test.io.", host: "test_host.example.test.io"},
+           "/dns/srv"
+         ) do
       {:ok, body} ->
         assert body == "No Content"
+
       {:error, _message} ->
+        nil
         # Not sure why this is erroring, but the record is deleting correctly.
     end
-    assert DNS.Cache.get_record(:srv, "_my_test._tcp.example.test.io.") == [{0, 0, 1000, "test_host2.example.test.io"}]
+
+    assert DNS.Cache.get_record(:srv, "_my_test._tcp.example.test.io.") == [
+             {0, 0, 1000, "test_host2.example.test.io"}
+           ]
   end
 
   test "put request for a record ipV4" do
@@ -80,7 +106,7 @@ defmodule Rest.DnrestApiTest do
     |> put_body_or_params(Poison.encode!(body))
     |> post(url)
     |> Map.get(:resp_body)
-    |> Poison.decode
+    |> Poison.decode()
   end
 
   def delete_and_respond(body, url) do
@@ -89,6 +115,6 @@ defmodule Rest.DnrestApiTest do
     |> put_body_or_params(Poison.encode!(body))
     |> delete(url)
     |> Map.get(:resp_body)
-    |> Poison.decode
+    |> Poison.decode()
   end
 end

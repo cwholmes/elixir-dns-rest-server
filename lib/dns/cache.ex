@@ -41,16 +41,22 @@ defmodule DNS.Cache do
   def canonicalize(key) when is_binary(key) do
     suffix = System.get_env("DEFAULT_DNS_SUFFIX")
     Logger.debug("Default dns suffix: #{suffix}")
+
     cond do
       Regex.match?(~r/^_\w+(_\w+)*._(tcp|udp)\.$/, key) ->
         key <> suffix <> "."
+
       Regex.match?(~r/^_\w+(_\w+)*._(tcp|udp)$/, key) ->
         key <> "." <> suffix <> "."
+
       Regex.match?(~r/^_\w+(_\w+)*._(tcp|udp)\.#{suffix}$/, key) ->
         key <> "."
+
       !String.contains?(key, ".") ->
         key <> "." <> suffix
-      true -> key
+
+      true ->
+        key
     end
   end
 
@@ -88,14 +94,17 @@ defmodule DNS.Cache do
   def handle_cast({:write, :srv, key, val}, cache) when is_tuple(val) do
     if tuple_size(val) == 4 && Map.has_key?(cache, :srv) do
       srvList = Map.get(cache, :srv)
-      srvList = if Map.has_key?(srvList, key) do
-        Map.put(srvList, key, Map.get(srvList, key) ++ [val])
-      else
-        Map.put(srvList, key, [val])
-      end
+
+      srvList =
+        if Map.has_key?(srvList, key) do
+          Map.put(srvList, key, Map.get(srvList, key) ++ [val])
+        else
+          Map.put(srvList, key, [val])
+        end
+
       {:noreply, Map.put(cache, :srv, srvList)}
     else
-      {:noreply, Map.put(cache, :srv,%{key => [val]})}
+      {:noreply, Map.put(cache, :srv, %{key => [val]})}
     end
   end
 
@@ -112,15 +121,20 @@ defmodule DNS.Cache do
   def handle_cast({:delete, :srv, key, val_map}, cache) when is_map(val_map) do
     if Map.has_key?(cache, :srv) do
       temp_type_map = Map.get(cache, :srv)
-      temp_val_list = case Map.get(temp_type_map, key) do
-        nil -> []
-        other -> other
-      end
-      temp_type_map = case Enum.filter(temp_val_list, filter_srv(val_map)) do
-        # If the map ends up empty remove it.
-        [] -> Map.delete(temp_type_map, key)
-        other -> Map.put(temp_type_map, key, other)
-      end
+
+      temp_val_list =
+        case Map.get(temp_type_map, key) do
+          nil -> []
+          other -> other
+        end
+
+      temp_type_map =
+        case Enum.filter(temp_val_list, filter_srv(val_map)) do
+          # If the map ends up empty remove it.
+          [] -> Map.delete(temp_type_map, key)
+          other -> Map.put(temp_type_map, key, other)
+        end
+
       {:noreply, Map.put(cache, :srv, temp_type_map)}
     else
       {:noreply, cache}
@@ -137,25 +151,25 @@ defmodule DNS.Cache do
   end
 
   defp filter_srv(%{host: host, port: port} = val_map) do
-    fn(val) ->
+    fn val ->
       elem(val, 2) != port || !String.equivalent?(elem(val, 3), host)
     end
   end
 
   defp filter_srv(%{host: host} = val_map) do
-    fn(val) ->
+    fn val ->
       !String.equivalent?(elem(val, 3), host)
     end
   end
 
   defp filter_srv(%{port: port} = val_map) do
-    fn(val) ->
+    fn val ->
       elem(val, 2) != port
     end
   end
 
   defp filter_srv(val_map) do
-    fn(val) ->
+    fn val ->
       # if no map is provided invalidate all
       false
     end

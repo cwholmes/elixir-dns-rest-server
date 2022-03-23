@@ -5,9 +5,9 @@
 use Mix.Config
 
 config :elixir_dns_server, Rest.DnrestApi,
-       # modify this for you desired dev port
-       port: 8000
+  # modify this for you desired dev port
+  port: 8000
 
 config :elixir_dns_server, DNS.DnrestServer,
-       # modify this for you desired dev port
-       dns_port: 53
+  # modify this for you desired dev port
+  dns_port: 53

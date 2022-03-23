@@ -30,13 +30,13 @@ use Mix.Config
 #     import_config "#{Mix.env()}.exs"
 # config/config.exs
 config :elixir_dns_server, Rest.DnrestApi,
-       adapter: Plug.Cowboy,
-       plug: Rest.API,
-       scheme: :http,
-       ip: {0,0,0,0}
+  adapter: Plug.Cowboy,
+  plug: Rest.API,
+  scheme: :http,
+  ip: {0, 0, 0, 0}
 
 config :elixir_dns_server,
-       maru_servers: [Rest.DnrestApi]
+  maru_servers: [Rest.DnrestApi]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

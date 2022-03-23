@@ -67,7 +67,7 @@ defmodule DNS.DnrestServer do
             end
         end
       :cname ->
-        makeResource('domains.cerner.corp', query)
+        makeResource(System.get_env("DEFAULT_DNS_SUFFIX"), query)
       :srv ->
         case DNS.Cache.get_record(:srv, query.domain |> to_string |> DNS.Cache.canonicalize) do
           nil -> []

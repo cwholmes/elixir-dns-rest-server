@@ -34,7 +34,7 @@ RUN rm -Rf _build; \
 #================
 #Deployment Stage
 #================
-FROM alpine:3.9
+FROM alpine:3.13
 
 # Bash is needed to run the erlang app
 RUN apk add --update bash curl; \

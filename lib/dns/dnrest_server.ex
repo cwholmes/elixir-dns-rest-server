@@ -43,7 +43,7 @@ defmodule DNS.DnrestServer do
       getRecordFromCache(query)
     rescue
        # If there is a failure we just need to return empty answers.
-       []
+       e -> []
     end
 
     Logger.debug("Answer List:")

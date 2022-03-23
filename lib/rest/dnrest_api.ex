@@ -1,5 +1,5 @@
 defmodule Rest.DnrestApi do
-  use Maru.Server, otp_app: :restful_dns
+  use Maru.Server, otp_app: :elixir_dns_server
 end
 
 defmodule Router.DNS do

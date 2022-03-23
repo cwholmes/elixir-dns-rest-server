@@ -2,7 +2,7 @@ defmodule Dnrest.MixProject do
   use Mix.Project
 
   @version "0.1.0"
-
+  @scm_url "https://github.com/cwholmes/elixir-dns-server"
   @description """
     DNS server that contains a rest endpoint for A and SRV registration.
   """
@@ -16,7 +16,7 @@ defmodule Dnrest.MixProject do
       description: @description,
       package: package(),
       deps: deps(),
-      source_url: "https://github.com/cwholmes/elixir-dns-server"
+      source_url: @scm_url
     ]
   end
 
@@ -38,7 +38,7 @@ defmodule Dnrest.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:ranch, "~> 1.7.1"},
       {:cowboy, "~> 2.6.3"},
-      {:distillery, "~> 1.5.2"},
+      {:distillery, "~> 1.5.2", runtime: false},
       {:poison, "~> 3.1"}
     ]
   end
@@ -48,7 +48,7 @@ defmodule Dnrest.MixProject do
       name: "elixir-dns-server",
       licenses: ["Apache-2.0"],
       maintainers: ["Cody Holmes"],
-      links: %{GitHub: "https://github.com/cwholmes/elixir-dns-server"}
+      links: %{GitHub: @scm_url}
     ]
   end
 end

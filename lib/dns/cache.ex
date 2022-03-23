@@ -40,16 +40,16 @@ defmodule DNS.Cache do
 
   def canonicalize(key) when is_binary(key) do
     suffix = System.get_env("DEFAULT_DNS_SUFFIX")
+    Logger.info("Default dns suffix: #{suffix}")
     cond do
       Regex.match?(~r/^_\w+(_\w+)*._(tcp|udp)\.$/, key) ->
         key <> suffix <> "."
       Regex.match?(~r/^_\w+(_\w+)*._(tcp|udp)$/, key) ->
-        key <> suffix <> "."
-      # need to add already canonical support
-      #Regex.match?(~r/^_\w+(_\w+)*._(tcp|udp)$/, key) ->
-      #  key <> "."
+        key <> "." <> suffix <> "."
+      Regex.match?(~r/^_\w+(_\w+)*._(tcp|udp)\.#{suffix}$/, key) ->
+        key <> "."
       !String.contains?(key, ".") ->
-        key <> suffix
+        key <> "." <> suffix
       true -> key
     end
   end

@@ -40,7 +40,7 @@ defmodule DNS.Cache do
 
   def canonicalize(key) when is_binary(key) do
     suffix = System.get_env("DEFAULT_DNS_SUFFIX")
-    Logger.info("Default dns suffix: #{suffix}")
+    Logger.debug("Default dns suffix: #{suffix}")
     cond do
       Regex.match?(~r/^_\w+(_\w+)*._(tcp|udp)\.$/, key) ->
         key <> suffix <> "."

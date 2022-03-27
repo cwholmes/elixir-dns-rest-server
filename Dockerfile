@@ -25,7 +25,7 @@ RUN rm -Rf _build; \
     # run tests
     mix test; \
     rm -Rf _build; \
-    mix release; \
+    mix distillery.release; \
     #Extract Release archive to /rel for copying in next stage
     RELEASE_DIR=`ls -d _build/prod/rel/$APP_NAME/releases/*/`; \
     mkdir /export; \

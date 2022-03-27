@@ -38,7 +38,7 @@ defmodule Dnrest.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:ranch, "~> 1.7.1"},
       {:cowboy, "~> 2.6.3"},
-      {:distillery, "~> 1.5.2", runtime: false},
+      {:distillery, "~> 2.1.1", runtime: false},
       {:poison, "~> 3.1"}
     ]
   end

@@ -1,4 +1,4 @@
-# RESTful-DNS
+# Elixir DNS Rest Server
 :warning: Experimental :warning:
 
 ## First steps
@@ -87,10 +87,11 @@ Unchanged:
 
 See this [documentation](https://hexdocs.pm/mix/Mix.Config.html).
 
-For this project, we will have 3 environments. (dev, test, and prod).
+For this project, we will have 4 environments. (dev, test, debug, and prod).
 
 1. [Dev](config/dev.exs) - This environment will be used to deploy this application in a development setting.
 1. [Test](config/test.exs) - This environment will be used to run the existing tests.
+1. [Debug](config/debug.exs) - This environment will be used to deploy this application in a post release environment with debug configurations.
 1. [Prod](config/prod.exs) - This environment will be used to deploy this application in a post release environment.
 
 ### Testing
@@ -427,9 +428,9 @@ Generated elixir_dns_server app
 [1m[36m==> Packaging release..[0m
 [1m[32m==> Release successfully built!
     You can run it in one of the following ways:
-      Interactive: _build/prod/rel/elixir_dns_server/bin/elixir_dns_server.bat console
-      Foreground: _build/prod/rel/elixir_dns_server/bin/elixir_dns_server.bat foreground
-      Daemon: _build/prod/rel/elixir_dns_server/bin/elixir_dns_server.bat start[0m
+      Interactive: _build/prod/rel/elixir_dns_rest_server/bin/elixir_dns_rest_server.bat console
+      Foreground: _build/prod/rel/elixir_dns_rest_server/bin/elixir_dns_server.bat foreground
+      Daemon: _build/prod/rel/elixir_dns_rest_server/bin/elixir_dns_server.bat start[0m
 ```
 
 The commands presented can then be run.
@@ -445,7 +446,7 @@ By default the released version of this component does not log anything other th
 To assist with debugging of this component, a debug image can be constructed with this command:
 
 ```bash
-docker build -t elixir-dns-server:debug --build-arg MIX_ENV=debug .
+docker build -t elixir-dns-rest-server:debug --build-arg MIX_ENV=debug .
 ```
 
 This will create an image with the log level set to `:debug`. This will help with troubleshooting issues, by capturing more event logging.

@@ -2,14 +2,14 @@ defmodule Dnrest.MixProject do
   use Mix.Project
 
   @version "0.1.0"
-  @scm_url "https://github.com/cwholmes/elixir-dns-server"
+  @scm_url "https://github.com/cwholmes/elixir-dns-rest-server"
   @description """
     DNS server that contains a rest endpoint for A and SRV registration.
   """
 
   def project do
     [
-      app: :elixir_dns_server,
+      app: :elixir_dns_rest_server,
       name: "DNreSt",
       version: @version,
       elixir: "~> 1.13",
@@ -45,7 +45,7 @@ defmodule Dnrest.MixProject do
 
   defp package do
     [
-      name: "elixir-dns-server",
+      name: "elixir-dns-rest-server",
       licenses: ["Apache-2.0"],
       maintainers: ["Cody Holmes"],
       links: %{GitHub: @scm_url}

@@ -445,7 +445,7 @@ By default the released version of this component does not log anything other th
 To assist with debugging of this component, a debug image can be constructed with this command:
 
 ```bash
-docker build -t elixir-dns-server:debug -f Dockerfile.debug .
+docker build -t elixir-dns-server:debug --build-arg MIX_ENV=debug .
 ```
 
 This will create an image with the log level set to `:debug`. This will help with troubleshooting issues, by capturing more event logging.

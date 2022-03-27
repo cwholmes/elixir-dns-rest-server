@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :elixir_dns_server, Rest.DnrestApi,
   port: 0,

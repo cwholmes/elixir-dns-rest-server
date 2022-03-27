@@ -1,9 +1,11 @@
 #===========
 #Build Stage
 #===========
-FROM elixir:1.8-alpine as build
+FROM elixir:1.13-alpine as build
 
-ENV MIX_ENV=prod \
+ARG MIX_ENV=prod
+
+ENV MIX_ENV=$MIX_ENV \
   APP_NAME="elixir_dns_server"
 
 WORKDIR /workdir
@@ -27,7 +29,7 @@ RUN rm -Rf _build; \
     rm -Rf _build; \
     mix distillery.release; \
     #Extract Release archive to /rel for copying in next stage
-    RELEASE_DIR=`ls -d _build/prod/rel/$APP_NAME/releases/*/`; \
+    RELEASE_DIR=`ls -d _build/$MIX_ENV/rel/$APP_NAME/releases/*/`; \
     mkdir /export; \
     tar -xf "$RELEASE_DIR/$APP_NAME.tar.gz" -C /export
 
@@ -35,6 +37,8 @@ RUN rm -Rf _build; \
 #Deployment Stage
 #================
 FROM alpine:3.13
+
+ARG MIX_ENV=prod
 
 # Bash is needed to run the erlang app
 RUN apk add --update bash curl; \
@@ -44,7 +48,7 @@ RUN apk add --update bash curl; \
 EXPOSE 8080 53/udp
 
 ENV REPLACE_OS_VARS=true \
-  MIX_ENV=prod \
+  MIX_ENV=$MIX_ENV \
   APP_NAME="elixir_dns_server"
 
 #Copy and extract .tar.gz Release file from the previous stage

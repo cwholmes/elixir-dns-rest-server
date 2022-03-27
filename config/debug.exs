@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :elixir_dns_server, Rest.DnrestApi,
   # modify this for you desired dev port

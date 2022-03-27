@@ -11,7 +11,7 @@ defmodule DNS.IP_Utils do
     ip |> :inet.ntoa() |> :inet.parse_ipv4_address()
   end
 
-  def to_ipv4(ip) do
+  def to_ipv4(_ip) do
     {:error, "incompatible type"}
   end
 end

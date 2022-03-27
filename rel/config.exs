@@ -7,14 +7,13 @@ Path.join(["rel", "plugins", "*.exs"])
 |> Enum.map(&Code.eval_file(&1))
 
 use Distillery.Releases.Config,
-    # This sets the default release built by `mix distillery.release`
-    default_release: :default,
-    # This sets the default environment used by `mix distillery.release`
-    default_environment: Mix.env()
+  # This sets the default release built by `mix distillery.release`
+  default_release: :default,
+  # This sets the default environment used by `mix distillery.release`
+  default_environment: Mix.env()
 
 # For a full list of config options for both releases
 # and environments, visit https://hexdocs.pm/distillery/configuration.html
-
 
 # You may define one or more environments in this file,
 # an environment's settings will override those of a release
@@ -28,18 +27,18 @@ environment :dev do
   # It is recommended that you build with MIX_ENV=prod and pass
   # the --env flag to Distillery explicitly if you want to use
   # dev mode.
-  set dev_mode: true
-  set include_erts: false
+  set(dev_mode: true)
+  set(include_erts: false)
 end
 
 environment :prod do
-  set include_erts: true
-  set include_src: false
+  set(include_erts: true)
+  set(include_src: false)
 end
 
 environment :debug do
-  set include_erts: true
-  set include_src: false
+  set(include_erts: true)
+  set(include_src: false)
 end
 
 # You may define one or more releases in this file.
@@ -48,9 +47,12 @@ end
 # will be used by default
 
 release :elixir_dns_server do
-  set version: current_version(:elixir_dns_server)
-  set cookie: :elixir_dns_server
-  set applications: [
-    :runtime_tools
-  ]
+  set(version: current_version(:elixir_dns_server))
+  set(cookie: :elixir_dns_server)
+
+  set(
+    applications: [
+      :runtime_tools
+    ]
+  )
 end

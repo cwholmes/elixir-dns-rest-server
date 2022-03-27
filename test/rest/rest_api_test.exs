@@ -45,7 +45,7 @@ defmodule Rest.DnrestApiTest do
       {:ok, body} ->
         assert body == "No Content"
 
-      {:error, message} ->
+      {:error, _message} ->
         nil
         # Not sure why this is erroring, but the record is deleting correctly.
     end

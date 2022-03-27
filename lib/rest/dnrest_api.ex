@@ -58,7 +58,7 @@ defmodule Router.DNS do
           :ok ->
             conn |> put_status(204) |> text("No content")
 
-          other ->
+          _other ->
             conn |> put_status(500) |> text("Record could not be deleted.")
         end
       end

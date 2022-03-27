@@ -12,7 +12,7 @@ defmodule Dnrest.MixProject do
       app: :elixir_dns_server,
       name: "DNreSt",
       version: @version,
-      elixir: "~> 1.8",
+      elixir: "~> 1.13",
       description: @description,
       package: package(),
       deps: deps(),

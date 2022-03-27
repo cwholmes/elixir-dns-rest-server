@@ -128,8 +128,10 @@ defmodule DNS.Cache do
           other -> other
         end
 
+      Logger.debug("Filtering [#{key}] with: #{inspect(val_map)}")
+
       temp_type_map =
-        case Enum.filter(temp_val_list, filter_srv(val_map)) do
+        case Enum.filter(temp_val_list, val_map |> filter_srv |> wrap_with_log) do
           # If the map ends up empty remove it.
           [] -> Map.delete(temp_type_map, key)
           other -> Map.put(temp_type_map, key, other)
@@ -141,7 +143,7 @@ defmodule DNS.Cache do
     end
   end
 
-  def handle_cast({:delete, :srv, key, val_map}, cache) do
+  def handle_cast({:delete, :srv, _key, _val_map}, cache) do
     # map was not valid so we don't delete anything
     {:noreply, cache}
   end
@@ -150,28 +152,56 @@ defmodule DNS.Cache do
     {:noreply, %{}}
   end
 
-  defp filter_srv(%{host: host, port: port} = val_map) do
+  defp filter_srv(%{host: host, port: port} = _val_map) do
+    host_string =
+      cond do
+        is_binary(host) -> host
+        true -> to_string(host)
+      end
+
     fn val ->
-      elem(val, 2) != port || !String.equivalent?(elem(val, 3), host)
+      elem(val, 2) != port || !String.equivalent?(elem(val, 3), host_string)
     end
   end
 
-  defp filter_srv(%{host: host} = val_map) do
+  defp filter_srv(%{host: host} = _val_map) do
+    host_string =
+      cond do
+        is_binary(host) -> host
+        true -> to_string(host)
+      end
+
     fn val ->
-      !String.equivalent?(elem(val, 3), host)
+      !String.equivalent?(elem(val, 3), host_string)
     end
   end
 
-  defp filter_srv(%{port: port} = val_map) do
+  defp filter_srv(%{port: port} = _val_map) do
     fn val ->
       elem(val, 2) != port
     end
   end
 
-  defp filter_srv(val_map) do
-    fn val ->
+  defp filter_srv(_val_map) do
+    fn _val ->
       # if no map is provided invalidate all
       false
+    end
+  end
+
+  defp wrap_with_log(f) do
+    case Logger.level() |> Logger.compare_levels(:debug) do
+      :gt ->
+        f
+
+      _ ->
+        fn val ->
+          result = f.(val)
+
+          if result do
+            Logger.debug("Filtering value: #{inspect(val)}")
+          end
+        end
     end
   end
 end

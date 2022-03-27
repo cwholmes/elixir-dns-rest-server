@@ -158,11 +158,7 @@ defmodule DNS.Cache do
     end
   end
 
-  defp filter_srv(%{host: host, port: port} = val_map) do
-    filter_srv(%{val_map | host: to_string(host)})
-  end
-
-  defp filter_srv(%{host: host} = _val_map) do
+  defp filter_srv(%{host: host} = _val_map) when is_binary(host) do
     host_string =
       cond do
         is_binary(host) -> host
@@ -172,6 +168,10 @@ defmodule DNS.Cache do
     fn val ->
       !String.equivalent?(elem(val, 3), host_string)
     end
+  end
+
+  defp filter_srv(%{host: host} = val_map) do
+    filter_srv(%{val_map | host: to_string(host)})
   end
 
   defp filter_srv(%{port: port} = _val_map) do

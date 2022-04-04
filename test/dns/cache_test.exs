@@ -97,7 +97,8 @@ defmodule DNS.CacheTest do
     DNS.Cache.set_record(:srv, "_test_srv1._tcp", {0, 0, 2000, "test"})
     DNS.Cache.set_record(:srv, "_test_srv1._tcp", {0, 0, 1000, "test2"})
 
-    assert DNS.Cache.delete_srv_record("_test_srv1._tcp", %{host: 'test', port: 1000, other: 1}) == :ok
+    assert DNS.Cache.delete_srv_record("_test_srv1._tcp", %{host: 'test', port: 1000, other: 1}) ==
+             :ok
 
     assert DNS.Cache.get_record(:srv, "_test_srv1._tcp") == [
              {0, 0, 2000, "test"},
@@ -110,7 +111,8 @@ defmodule DNS.CacheTest do
     DNS.Cache.set_record(:srv, "_test_srv1._tcp", {0, 0, 2000, "test"})
     DNS.Cache.set_record(:srv, "_test_srv1._tcp", {0, 0, 1000, "test2"})
 
-    assert DNS.Cache.delete_srv_record("_test_srv1._tcp", %{host: "test", port: 1000, other: 1}) == :ok
+    assert DNS.Cache.delete_srv_record("_test_srv1._tcp", %{host: "test", port: 1000, other: 1}) ==
+             :ok
 
     assert DNS.Cache.get_record(:srv, "_test_srv1._tcp") == [
              {0, 0, 2000, "test"},

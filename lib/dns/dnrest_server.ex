@@ -31,7 +31,7 @@ defmodule DNS.DnrestServer do
   def handle_info({:udp, _client, ip, wtv, data}, state) do
     {:ok, erl_record} = :inet_dns.decode(data)
     response = handle(erl_record)
-    :gen_udp.send(state.socket, ip, wtv, :inet_dns.encode(response))
+    :ok = :gen_udp.send(state.socket, ip, wtv, :inet_dns.encode(response))
     {:noreply, state}
   end
 

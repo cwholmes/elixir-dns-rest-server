@@ -8,22 +8,18 @@ defmodule DNS.ServerTest do
   end
 
   test "retrieve an :a record through dns" do
-    {port, _} = System.get_env("DNS_PORT") |> Integer.parse()
     DNS.Cache.set_record(:a, "me.com", "127.0.0.1")
-    {:ok, record} = DNS.resolve("me.com", :a, {"127.0.0.1", port})
+    {:ok, record} = resolve("me.com", :a)
     assert record == [{127, 0, 0, 1}]
   end
 
   test "retrieve an :a record through dns - charlist" do
-    {port, _} = System.get_env("DNS_PORT") |> Integer.parse()
     DNS.Cache.set_record(:a, "me.com", to_charlist("127.0.0.1"))
-    {:ok, record} = DNS.resolve("me.com", :a, {"127.0.0.1", port})
+    {:ok, record} = resolve("me.com", :a)
     assert record == [{127, 0, 0, 1}]
   end
 
   test "retrieve an :a record through dns - IPAddress" do
-    {port, _} = System.get_env("DNS_PORT") |> Integer.parse()
-
     address =
       case "127.0.0.1" |> DNS.IP_Utils.to_ipv4() do
         {:ok, address} ->
@@ -31,34 +27,64 @@ defmodule DNS.ServerTest do
       end
 
     DNS.Cache.set_record(:a, "me.com", address)
-    {:ok, record} = DNS.resolve("me.com", :a, {"127.0.0.1", port})
+    {:ok, record} = resolve("me.com", :a)
     assert record == [{127, 0, 0, 1}]
   end
 
   test "retrieve an :a record through dns - tuple" do
-    {port, _} = System.get_env("DNS_PORT") |> Integer.parse()
     DNS.Cache.set_record(:a, "me.com", {127, 0, 0, 1})
-    {:ok, record} = DNS.resolve("me.com", :a, {"127.0.0.1", port})
+    {:ok, record} = resolve("me.com", :a)
     assert record == [{127, 0, 0, 1}]
   end
 
   test "retrieve an :a record through dns - char" do
-    {port, _} = System.get_env("DNS_PORT") |> Integer.parse()
     DNS.Cache.set_record(:a, "me.com", fn -> "hello" end)
-    {:error, :not_found} = DNS.resolve("me.com", :a, {"127.0.0.1", port})
+    {:error, :not_found} = resolve("me.com", :a)
   end
 
   test "retrieve an :srv record through dns" do
-    {port, _} = System.get_env("DNS_PORT") |> Integer.parse()
     DNS.Cache.set_record(:srv, "_test_srv._tcp.example.test.io.", {0, 0, 1000, 'my_host'})
-    {:ok, record} = DNS.resolve("_test_srv._tcp.", :srv, {"127.0.0.1", port})
+    {:ok, record} = resolve("_test_srv._tcp.", :srv)
     assert record == [{0, 0, 1000, 'my_host'}]
   end
 
   test "retrieve an :srv record through dns no period" do
-    {port, _} = System.get_env("DNS_PORT") |> Integer.parse()
     DNS.Cache.set_record(:srv, "_test_srv._tcp.example.test.io.", {0, 0, 1000, 'my_host'})
-    {:ok, record} = DNS.resolve("_test_srv._tcp", :srv, {"127.0.0.1", port})
+    {:ok, record} = resolve("_test_srv._tcp", :srv)
     assert record == [{0, 0, 1000, 'my_host'}]
+  end
+
+  defp resolve(domain, type) do
+    {:ok, socket} = :gen_udp.open(0, [:binary, active: false])
+
+    {:ok, {_, _, data}} =
+      try do
+        {port, _} = System.get_env("DNS_PORT") |> Integer.parse()
+
+        request =
+          {:dns_rec, {:dns_header, 0, false, :query, false, false, true, false, false, 0},
+           [{:dns_query, domain |> to_charlist, type, :in}], [], [], []}
+
+        :ok = :gen_udp.send(socket, '127.0.0.1', port, :inet_dns.encode(request))
+
+        :gen_udp.recv(socket, 0, 5_000)
+      after
+        :ok = :gen_udp.close(socket)
+      end
+
+    {:ok, {:dns_rec, _, _, answers, _, _}} = :inet_dns.decode(data)
+
+    cond do
+      is_list(answers) and length(answers) > 0 ->
+        output =
+          answers
+          |> Enum.map(&elem(&1, 6))
+          |> Enum.reject(&is_nil/1)
+
+        {:ok, output}
+
+      true ->
+        {:error, :not_found}
+    end
   end
 end

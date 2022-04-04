@@ -38,8 +38,7 @@ defmodule Dnrest.MixProject do
       {:ranch, "~> 1.7.1"},
       {:cowboy, "~> 2.6.3"},
       {:poison, "~> 3.1"},
-      {:distillery, "~> 2.1.1", runtime: false},
-      {:dns, "~> 2.1.2", only: :test}
+      {:distillery, "~> 2.1.1", runtime: false}
     ]
   end
 

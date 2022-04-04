@@ -57,7 +57,7 @@ defmodule DNS.DnrestServer do
   defp getRecordFromCache(query) do
     case query.type do
       :a ->
-        case DNS.Cache.get_record(:a, to_string(query.domain) |> DNS.Cache.canonicalize()) do
+        case DNS.Cache.get_record(:a, query.domain |> to_string() |> DNS.Cache.canonicalize()) do
           nil ->
             []
 
@@ -73,10 +73,10 @@ defmodule DNS.DnrestServer do
         end
 
       :cname ->
-        makeResource(System.get_env("DEFAULT_DNS_SUFFIX"), query)
+        makeResource(query.domain |> to_string() |> DNS.Cache.canonicalize(), query)
 
       :srv ->
-        case DNS.Cache.get_record(:srv, query.domain |> to_string |> DNS.Cache.canonicalize()) do
+        case DNS.Cache.get_record(:srv, query.domain |> to_string() |> DNS.Cache.canonicalize()) do
           nil -> []
           value -> Enum.map(value, fn data -> makeResource(data, query) end)
         end

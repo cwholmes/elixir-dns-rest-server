@@ -35,7 +35,7 @@ defmodule DNS.Cache do
   end
 
   def canonicalize(key) when is_list(key) do
-    key |> to_string |> canonicalize |> to_charlist
+    key |> to_string |> canonicalize
   end
 
   def canonicalize(key) when is_binary(key) do

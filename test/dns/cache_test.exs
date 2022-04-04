@@ -147,7 +147,7 @@ defmodule DNS.CacheTest do
   end
 
   test "Canonicalize binary simple" do
-    assert DNS.Cache.canonicalize('_test_srv._tcp') == '_test_srv._tcp.example.test.io.'
+    assert DNS.Cache.canonicalize('_test_srv._tcp') == "_test_srv._tcp.example.test.io."
   end
 
   test "Canonicalize string host canonical" do
@@ -159,10 +159,10 @@ defmodule DNS.CacheTest do
   end
 
   test "Canonicalize binary host canonical" do
-    assert DNS.Cache.canonicalize('host_name.com') == 'host_name.com'
+    assert DNS.Cache.canonicalize('host_name.com') == "host_name.com"
   end
 
   test "Canonicalize binary host simple" do
-    assert DNS.Cache.canonicalize('host_name') == 'host_name.example.test.io'
+    assert DNS.Cache.canonicalize('host_name') == "host_name.example.test.io"
   end
 end

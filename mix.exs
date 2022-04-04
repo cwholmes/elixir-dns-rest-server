@@ -32,14 +32,14 @@ defmodule Dnrest.MixProject do
   # Run "mix deps.get" to download the deps for this project
   defp deps do
     [
-      {:dns, "~> 2.1.2"},
       {:maru, "~> 0.13"},
       {:jason, "~> 1.1.2"},
       {:plug_cowboy, "~> 2.0"},
       {:ranch, "~> 1.7.1"},
       {:cowboy, "~> 2.6.3"},
+      {:poison, "~> 3.1"},
       {:distillery, "~> 2.1.1", runtime: false},
-      {:poison, "~> 3.1"}
+      {:dns, "~> 2.1.2", only: :test}
     ]
   end
 

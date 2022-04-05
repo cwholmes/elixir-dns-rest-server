@@ -20,33 +20,43 @@ defmodule DNS.Records do
   )
 
   defmacro to_record(map, type) do
-    keys = get_keys(type)
+    keys = get_keys_with_defaults(type)
+
+    # build a keyword from the map given to call the record macro
+    keyword_from_map =
+      Enum.map(keys, fn {key, value} ->
+        quote(do: {unquote(key), Map.get(unquote(map), unquote(key), unquote(value))})
+      end)
 
     quote do
-      [unquote(type) | [unquote_splicing(keys)] |> Enum.map(&Map.get(unquote(map), &1))]
-      |> List.to_tuple()
+      DNS.Records.unquote(type)([unquote_splicing(keyword_from_map)])
     end
   end
 
   defmacro to_map(record, type) do
-    keys = get_keys(type)
-
-    quote do
-      [_tag | values] = Tuple.to_list(unquote(record))
-      Enum.zip([unquote_splicing(keys)], values) |> Enum.into(%{})
+    if Keyword.keyword?(record) do
+      quote(do: unquote(record) |> Enum.into(%{}))
+    else
+      quote do
+        DNS.Records.unquote(type)(unquote(record)) |> Enum.into(%{})
+      end
     end
   end
 
-  defp get_keys(type) do
-    fields = Record.extract(type, from_lib: "kernel/src/inet_dns.hrl")
-
+  defp get_keys_with_defaults(type) do
     normalizer_fun = fn
-      {key, _} when is_atom(key) ->
-        key
+      {key, value} when is_atom(key) ->
+        {key, value}
 
       key when is_atom(key) ->
-        key
+        {key, nil}
     end
+
+    get_record_fields(type, normalizer_fun)
+  end
+
+  defp get_record_fields(type, normalizer_fun) do
+    fields = Record.extract(type, from_lib: "kernel/src/inet_dns.hrl")
 
     :lists.map(normalizer_fun, fields)
   end

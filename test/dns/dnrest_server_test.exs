@@ -67,7 +67,8 @@ defmodule DNS.ServerTest do
         request =
           DNS.Records.dns_rec(
             header: DNS.Records.dns_header(),
-            qdlist: [DNS.Records.dns_query(domain: domain |> to_charlist, type: type, class: :in)])
+            qdlist: [DNS.Records.dns_query(domain: domain |> to_charlist, type: type, class: :in)]
+          )
 
         :ok = :gen_udp.send(socket, '127.0.0.1', port, :inet_dns.encode(request))
 

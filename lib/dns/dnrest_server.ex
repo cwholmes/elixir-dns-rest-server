@@ -31,7 +31,7 @@ defmodule DNS.DnrestServer do
 
   def handle_info({:udp, _client, ip, wtv, data}, state) do
     {:ok, erl_record} = :inet_dns.decode(data)
-    response = handle(DNS.Records.to_map(erl_record))
+    response = handle(DNS.Records.to_map(erl_record, :dns_rec))
     :ok = :gen_udp.send(state.socket, ip, wtv, :inet_dns.encode(response))
     {:noreply, state}
   end
@@ -44,7 +44,7 @@ defmodule DNS.DnrestServer do
 
     resource =
       try do
-        getRecordFromCache(DNS.Records.to_map(query))
+        getRecordFromCache(DNS.Records.to_map(query, :dns_query))
       rescue
         # If there is a failure we just need to return empty answers.
         e ->

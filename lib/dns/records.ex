@@ -20,6 +20,24 @@ defmodule DNS.Records do
   )
 
   defmacro to_record(map, type) do
+    keys = get_keys(type)
+
+    quote do
+      [unquote(type) | [unquote_splicing(keys)] |> Enum.map(&Map.get(unquote(map), &1))]
+      |> List.to_tuple()
+    end
+  end
+
+  defmacro to_map(record, type) do
+    keys = get_keys(type)
+
+    quote do
+      [_tag | values] = Tuple.to_list(unquote(record))
+      Enum.zip([unquote_splicing(keys)], values) |> Enum.into(%{})
+    end
+  end
+
+  defp get_keys(type) do
     fields = Record.extract(type, from_lib: "kernel/src/inet_dns.hrl")
 
     normalizer_fun = fn
@@ -30,45 +48,6 @@ defmodule DNS.Records do
         key
     end
 
-    keys = :lists.map(normalizer_fun, fields)
-    IO.puts("keys = #{inspect(keys)}")
-
-    quote do
-      [unquote(type) | [unquote_splicing(keys)] |> Enum.map(&Map.get(unquote(map), &1))]
-      |> List.to_tuple()
-    end
-  end
-
-  defmacro to_map(record) do
-    to_map_quote(record, nil)
-  end
-
-  defmacro to_map(record, type) do
-    case type do
-      :dns_header -> quote do: unquote(record) |> DNS.Records.dns_header() |> Enum.into(%{})
-      :dns_rec -> quote do: unquote(record) |> DNS.Records.dns_rec() |> Enum.into(%{})
-      :dns_rr -> quote do: unquote(record) |> DNS.Records.dns_rr() |> Enum.into(%{})
-      :dns_query -> quote do: unquote(record) |> DNS.Records.dns_query() |> Enum.into(%{})
-      _ -> to_map_quote(record, type)
-    end
-  end
-
-  defp to_map_quote(record, type) do
-    quote do
-      rec_type =
-        case unquote(type) do
-          nil -> unquote(record) |> elem(0)
-          _ -> unquote(type)
-        end
-
-      Logger.debug("To map type = #{rec_type} record = #{inspect(unquote(record))}")
-
-      case rec_type do
-        :dns_header -> unquote(record) |> DNS.Records.dns_header() |> Enum.into(%{})
-        :dns_rec -> unquote(record) |> DNS.Records.dns_rec() |> Enum.into(%{})
-        :dns_rr -> unquote(record) |> DNS.Records.dns_rr() |> Enum.into(%{})
-        :dns_query -> unquote(record) |> DNS.Records.dns_query() |> Enum.into(%{})
-      end
-    end
+    :lists.map(normalizer_fun, fields)
   end
 end

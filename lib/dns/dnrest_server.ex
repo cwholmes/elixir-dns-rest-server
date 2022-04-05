@@ -5,6 +5,7 @@ defmodule DNS.DnrestServer do
   use GenServer
 
   require Logger
+  require DNS.Records
 
   def start_link([]) do
     GenServer.start_link(__MODULE__, [])
@@ -30,12 +31,12 @@ defmodule DNS.DnrestServer do
 
   def handle_info({:udp, _client, ip, wtv, data}, state) do
     {:ok, erl_record} = :inet_dns.decode(data)
-    response = handle(erl_record)
+    response = handle(DNS.Records.to_map(erl_record))
     :ok = :gen_udp.send(state.socket, ip, wtv, :inet_dns.encode(response))
     {:noreply, state}
   end
 
-  defp handle({:dns_rec, header, qdlist, _anlist, nslist, arlist}) do
+  defp handle(%{header: header, qdlist: qdlist} = record) do
     # see dns_rec definition here https://github.com/erlang/otp/blob/master/lib/kernel/src/inet_dns.hrl
     Logger.debug("Request Questions:")
     Logger.debug(fn -> "#{inspect(qdlist)}" end)
@@ -43,7 +44,7 @@ defmodule DNS.DnrestServer do
 
     resource =
       try do
-        getRecordFromCache(Tuple.to_list(query))
+        getRecordFromCache(DNS.Records.to_map(query))
       rescue
         # If there is a failure we just need to return empty answers.
         e ->
@@ -54,10 +55,19 @@ defmodule DNS.DnrestServer do
     Logger.debug("Answer List:")
     Logger.debug(fn -> "#{inspect(resource)}" end)
 
-    {:dns_rec, put_elem(header, 2, true), qdlist, resource, nslist, arlist}
+    try do
+      record
+      |> Map.put(:header, put_elem(header, 2, true))
+      |> Map.put(:anlist, resource)
+      |> DNS.Records.to_record(:dns_rec)
+    rescue
+      err ->
+        Logger.error(Exception.format(:error, err, __STACKTRACE__))
+        raise err
+    end
   end
 
-  defp getRecordFromCache([:dns_query, domain, type, class | _]) do
+  defp getRecordFromCache(%{domain: domain, type: type, class: class} = _query) do
     case type do
       :a ->
         case DNS.Cache.get_record(:a, domain |> DNS.Cache.canonicalize()) do
@@ -91,26 +101,6 @@ defmodule DNS.DnrestServer do
 
   defp makeResource(data, domain, type, class) do
     # see definition here https://github.com/erlang/otp/blob/master/lib/kernel/src/inet_dns.hrl
-    {
-      :dns_rr,
-      # domain
-      domain,
-      # type
-      type,
-      # class
-      class,
-      # cnt
-      0,
-      # ttl
-      0,
-      # data
-      data,
-      # tm
-      :undefined,
-      # bm
-      [],
-      # func
-      false
-    }
+    DNS.Records.dns_rr(domain: domain, data: data, type: type, class: class)
   end
 end

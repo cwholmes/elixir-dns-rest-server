@@ -2,6 +2,9 @@ defmodule DNS.ServerTest do
   use ExUnit.Case
   doctest Dnrest
 
+  require DNS.Records
+  require Logger
+
   setup _context do
     DNS.Cache.clear()
     System.put_env("DEFAULT_DNS_SUFFIX", "example.test.io")
@@ -62,8 +65,9 @@ defmodule DNS.ServerTest do
         {port, _} = System.get_env("DNS_PORT") |> Integer.parse()
 
         request =
-          {:dns_rec, {:dns_header, 0, false, :query, false, false, true, false, false, 0},
-           [{:dns_query, domain |> to_charlist, type, :in}], [], [], []}
+          DNS.Records.dns_rec(
+            header: DNS.Records.dns_header(),
+            qdlist: [DNS.Records.dns_query(domain: domain |> to_charlist, type: type, class: :in)])
 
         :ok = :gen_udp.send(socket, '127.0.0.1', port, :inet_dns.encode(request))
 
@@ -72,7 +76,9 @@ defmodule DNS.ServerTest do
         :ok = :gen_udp.close(socket)
       end
 
-    {:ok, {:dns_rec, _, _, answers, _, _}} = :inet_dns.decode(data)
+    {:ok, record} = :inet_dns.decode(data)
+
+    answers = DNS.Records.to_map(record, :dns_rec).anlist
 
     cond do
       is_list(answers) and length(answers) > 0 ->
